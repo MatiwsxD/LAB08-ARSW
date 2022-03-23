@@ -43,11 +43,9 @@ var app = (function () {
             stompClient.subscribe('/topic/newpoint', function (message) {
                 var theObject = JSON.parse(message.body);
                 alert(theObject.x + "--" + theObject.y);
-                var pnt = new Point(theObject.x,theObject.y);
-                addPointToCanvas(pnt);
-                callback(
-                    JSON.stringify(pnt)
-                )
+                var puntito = new Point(theObject.x, theObject.y);
+                addPointToCanvas(puntito);
+
             });
         });
 
