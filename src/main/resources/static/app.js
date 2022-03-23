@@ -19,7 +19,7 @@ var app = (function () {
     };
 
     var publicPoint = function (point) {
-        stompClient.send(`/topic/newpoint.${identificador}`
+        stompClient.send(`/app/newpoint.${identificador}`
             , {}, JSON.stringify(point));
     };
 
@@ -33,7 +33,17 @@ var app = (function () {
         };
     };
 
-
+    var addPolygonToCanvas = function (lista) {
+        var c2 = canvas.getContext("2d");
+        c2.fillStyle = "#b13de2";
+        c2.beginPath();
+        c2.moveTo(lista[0].x, lista[0].y);
+        for (var i = 1; i < lista.length; i++) {
+            c2.lineTo(lista[i].x, lista[i].y);
+        }
+        c2.closePath();
+        c2.fill();
+    };
     var connectAndSubscribe = function (numDib) {
         identificador = numDib;
         console.info('Connecting to WS...');
@@ -50,6 +60,14 @@ var app = (function () {
                 addPointToCanvas(puntito);
 
             });
+            stompClient.subscribe(
+                `/topic/newpolygon.${identificador}`,
+                function (message) {
+                    var listPolygons = JSON.parse(message.body);
+                    console.log(listPolygons);
+                    addPolygonToCanvas(listPolygons);
+                }
+            );
         });
 
     };
