@@ -6,7 +6,8 @@ var app = (function () {
             this.y=y;
         }        
     }
-    
+
+    var identificador = null;
     var stompClient = null;
 
     var addPointToCanvas = function (point) {        
@@ -18,7 +19,8 @@ var app = (function () {
     };
 
     var publicPoint = function (point) {
-        stompClient.send("/topic/newpoint", {}, JSON.stringify(point));
+        stompClient.send(`/topic/newpoint.${identificador}`
+            , {}, JSON.stringify(point));
     };
 
     var getMousePosition = function (evt) {
@@ -32,15 +34,16 @@ var app = (function () {
     };
 
 
-    var connectAndSubscribe = function () {
+    var connectAndSubscribe = function (numDib) {
+        identificador = numDib;
         console.info('Connecting to WS...');
         var socket = new SockJS('/stompendpoint');
         stompClient = Stomp.over(socket);
         
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (message) {
+            //console.log('Connected: ' + frame);
+            stompClient.subscribe(`/topic/newpoint.${identificador}`, function (message) {
                 var theObject = JSON.parse(message.body);
                 alert(theObject.x + "--" + theObject.y);
                 var puntito = new Point(theObject.x, theObject.y);
@@ -55,11 +58,11 @@ var app = (function () {
 
     return {
 
-        init: function () {
+        init: function (numDib) {
             var can = document.getElementById("canvas");
             
             //websocket connection
-            connectAndSubscribe();
+            connectAndSubscribe(numDib);
         },
 
         publishPoint: function(px,py){
